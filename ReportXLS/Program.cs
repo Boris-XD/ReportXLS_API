@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using ReportXLS.Repositories.Context;
+
 namespace ReportXLS
 {
     public class Program
@@ -12,6 +15,12 @@ namespace ReportXLS
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddDbContext<NotesDbContext>(options =>
+            {
+                options.UseNpgsql(builder.Configuration.GetConnectionString
+                    ("ApplicationDb"));
+            });
 
             var app = builder.Build();
 
