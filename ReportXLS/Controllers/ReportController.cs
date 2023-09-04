@@ -1,9 +1,15 @@
-﻿using ClosedXML.Excel;
+﻿using System;
+using System.IO;
+using System.Text.Json;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using ReportXLS.Repositories.Context;
 using ReportXLS.Repositories.Models;
+using ReportXLS.Services.Models;
 using System.Data;
+using ReportXLS.Services;
 
 namespace ReportXLS.Controllers
 {
@@ -12,11 +18,29 @@ namespace ReportXLS.Controllers
     public class ReportController : ControllerBase
     {
         private readonly NotesDbContext _notesDbContext;
+        public IConfiguration _configuration { get; set; }
 
-        public ReportController(NotesDbContext notesDbContext)
+        public ReportController(NotesDbContext notesDbContext, IConfiguration configuration)
         {
             _notesDbContext = notesDbContext;
+            _configuration = configuration;
         }
+
+
+        [HttpGet("notes")]
+        public async Task<IActionResult> GetNoteResult()
+        {
+
+            var notesResult = ReadJson.NoteResults();
+
+            using ( var workbook = new ExcelDetails(notesResult))
+            {
+                MemoryStream memoryStream = new MemoryStream();
+                workbook.SaveAs(memoryStream);
+                return File(memoryStream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "NAmess");
+            }
+        }
+
 
         [HttpGet]
         public async Task<FileResult> GetResponse()
